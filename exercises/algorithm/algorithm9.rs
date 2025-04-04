@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +22,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: Vec::new(),
             comparator,
         }
     }
@@ -38,6 +37,18 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        self.items.push(value);
+        let mut idx = self.count;
+        while idx > 1 {
+            let parent_idx = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx - 1], &self.items[parent_idx - 1]) {
+                self.items.swap(idx - 1, parent_idx - 1);
+                idx = parent_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +69,15 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        if self.right_child_idx(idx) <= self.count {
+            if (self.comparator)(&self.items[self.left_child_idx(idx) - 1], &self.items[self.right_child_idx(idx) - 1]) {
+                self.left_child_idx(idx)
+            } else {
+                self.right_child_idx(idx)
+            }
+        } else {
+            self.left_child_idx(idx)
+        }
     }
 }
 
@@ -85,7 +104,24 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.count == 0 {
+		    None
+        } else {
+            self.count -= 1;
+            self.items.swap(0, self.count);
+            let value = self.items.pop()?;
+            let mut idx = 1;
+            while self.children_present(idx) {
+                let child_idx = self.smallest_child_idx(idx);
+                if (self.comparator)(&self.items[child_idx - 1], &self.items[idx - 1]) {
+                    self.items.swap(idx - 1, child_idx - 1);
+                    idx = child_idx;
+                } else {
+                    break;
+                }
+            }
+            Some(value)
+        }
     }
 }
 
